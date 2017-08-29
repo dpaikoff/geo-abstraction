@@ -1,0 +1,11 @@
+host: localhost
+port: 5432
+db: geo_abstraction
+user: postgres
+
+shape: shapes.tl_2016_us_zcta510
+where: b.geoid10 = '95618'
+out_folder: /Users/dmp/Desktop/test
+table_prefix: zip_95618
+grid_cell_size: .01
+

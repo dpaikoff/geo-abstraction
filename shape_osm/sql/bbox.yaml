@@ -1,0 +1,35 @@
+Folder: /Users/dmp/Data/test
+FileName: some_area.osm
+BBox:
+    - [bbox=2.29,48.87,2.30,48.88]
+    - [bbox=2.29,48.87,2.30,48.88]
+    - [bbox=2.29,48.87,2.30,48.88]
+    - [bbox=2.29,48.87,2.30,48.88]
+
+
+
+SQL:
+    CREATE TABLE staging.us_contiguous_grid_01_intersect AS
+    (SELECT a.gid, a.left, a.top, a.right, a.bottom, a.geom FROM staging.us_contiguous_grid_01 a, staging.cb_2016_us_county_500k b
+    WHERE ST_Intersects(a.geom, b.geom));
+
+    CREATE INDEX us_contiguous_grid_01_intersect ON staging.us_contigous_grid_01_intersect USING GIST (geom);
+    CREATE INDEX us_contiguous_grid_01 ON staging.us_contigous_grid_01 USING GIST (geom);
+
+    CREATE TABLE staging.us_contiguous_grid_01_intersect_zip AS
+    (SELECT a.gid, a.left, a.top, a.right, a.bottom, b.geoid, a.geom FROM staging.us_contiguous_grid_01_intersect a, staging.tl_2016_us_zcta510 b
+    WHERE ST_Intersects(a.geom, b.geom));
+
+    CREATE TABLE staging.us_contiguous_grid_01_zip_tab AS
+    (SELECT a.gid, a.left, a.top, a.right, a.bottom, b.geoid FROM staging.us_contiguous_grid_01 a, staging.tl_2016_us_zcta510 b
+    WHERE ST_Intersects(a.geom, b.geom));
+
+    CREATE INDEX us_contiguous_grid_01_intersect_zip_tab ON staging.us_contiguous_grid_01_intersect_zip_tab USING (geoid);
+    CREATE INDEX us_contiguous_grid_01_zip_tab ON staging.us_contiguous_grid_01_zip_tab USING (zipcode);
+
+
+    # once table is created need to create pandas tool to connect to db then turn query into df
+    # take df and iterate through getting osm data named by gid_zip.osm into a folder named by zip
+    # then tool to iterate through folder and append to table
+    # need way to check to see last update or keep the aoi in a separate staging table before loading...
+
